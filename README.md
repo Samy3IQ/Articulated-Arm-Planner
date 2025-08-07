@@ -28,8 +28,8 @@ index = 0
 ServoPin: List[number] = []
 ServoPinNumber: List[number] = []
 ServoAngle: List[number] = []
-ServoAngle = [35, 0, 90, 70, 0, 35, 180, 70, 90, 35, 0]
-ServoPinNumber = [1, 0, 2, 1, 2, 1, 0, 1, 2, 1, 2]
+ServoAngle = [...]
+ServoPinNumber = [...]
 ServoPin = [AnalogPin.P0, AnalogPin.P1, AnalogPin.P2]
 ```
 
