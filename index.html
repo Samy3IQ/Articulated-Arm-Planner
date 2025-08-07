@@ -351,25 +351,38 @@
     elements.copyBoth.onclick = () => navigator.clipboard.writeText(`ServoAngle = ${JSON.stringify(ServoAngle)}\nServoPinNumber = ${JSON.stringify(ServoPinNumber)}`);
 
     window.addEventListener('keydown', (e) => {
+      // Block shortcuts except when in input
+      const isInput = ['INPUT', 'TEXTAREA'].includes(e.target.tagName);
+      const blockedKeys = [
+        'Tab', 'Enter', 'ArrowUp', 'ArrowDown',
+        'ArrowLeft', 'ArrowRight', 'Escape', 'Delete', 'Backspace'
+      ];
+
+      if (!isInput && blockedKeys.includes(e.key)) {
+        e.preventDefault();
+      }
+
       const key = e.key.toLowerCase();
       const p = presets[currentPreset];
-      if (p.left.includes(key)) setPreview('P0', parseInt(elements.p0left.value));
-      else if (p.right.includes(key)) setPreview('P0', parseInt(elements.p0right.value));
-      else if (p.up.includes(key)) setPreview('P1', parseInt(elements.p1up.value));
-      else if (p.down.includes(key)) setPreview('P1', parseInt(elements.p1down.value));
-      else if (p.open.includes(key)) setPreview('P2', parseInt(elements.p2open.value));
-      else if (p.close.includes(key)) setPreview('P2', parseInt(elements.p2closed.value));
-      else if (key === 'enter') confirmPreview();
-      else if (key === 'escape') preview = selectedPin = currentAngle = null, updateDisplay();
-      else if (key === 'backspace') deleteLast();
-      else if (key === 'delete') clearAll();
+      if (!isInput) {
+        if (p.left.includes(key)) setPreview('P0', parseInt(elements.p0left.value));
+        else if (p.right.includes(key)) setPreview('P0', parseInt(elements.p0right.value));
+        else if (p.up.includes(key)) setPreview('P1', parseInt(elements.p1up.value));
+        else if (p.down.includes(key)) setPreview('P1', parseInt(elements.p1down.value));
+        else if (p.open.includes(key)) setPreview('P2', parseInt(elements.p2open.value));
+        else if (p.close.includes(key)) setPreview('P2', parseInt(elements.p2closed.value));
+        else if (key === 'enter') confirmPreview();
+        else if (key === 'escape') preview = selectedPin = currentAngle = null, updateDisplay();
+        else if (key === 'backspace') deleteLast();
+        else if (key === 'delete') clearAll();
+      }
     });
 
     updateDisplay();
     elements.controlsExplanation.textContent = presets.azerty.explanation;
   </script>
 
-  <!-- GitHub Page link in bottom right -->
+  <!-- GitHub Page link -->
   <a href="https://github.com/Samy3IQ/Articulated-Arm-Planner" target="_blank" style="
     position: fixed;
     bottom: 10px;
