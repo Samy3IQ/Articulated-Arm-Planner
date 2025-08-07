@@ -1,14 +1,12 @@
 ## 🛠️ How to Use with MakeCode (Python)
 
-To make the output from **Articulated Arm Planner** compatible with your Micro:bit using MakeCode Python:
-
 ---
 
 ### 📌 Step 1: Open MakeCode and Switch to Python
 
 1. Go to [makecode.microbit.org](https://makecode.microbit.org/)
 2. Start a new project
-3. Click the **{ } Python** button to switch to Python mode
+3. Click the **Python** button to switch to Python mode
 
 ---
 
@@ -33,3 +31,31 @@ ServoAngle: List[number] = []
 ServoAngle = [35, 0, 90, 70, 0, 35, 180, 70, 90, 35, 0]
 ServoPinNumber = [1, 0, 2, 1, 2, 1, 0, 1, 2, 1, 2]
 ServoPin = [AnalogPin.P0, AnalogPin.P1, AnalogPin.P2]
+```
+
+---
+
+### ✂️ Step 3: Replace These Arrays with Your Own
+
+Use the **"Copy Both"** button in the Articulated Arm Planner web app, then replace the following two lines:
+
+```python
+ServoAngle = [...]
+ServoPinNumber = [...]
+```
+
+with the values you copied from the planner.
+
+---
+
+### 🔁 Step 4: Upload to Micro:bit
+
+1. Click the Download button
+2. Flash the **.hex** file to your Micro:bit
+3. Press Button B to execute the servo movement sequence
+
+---
+
+## ✅ Done!
+
+Your Micro:bit will now run the servo sequence created in the Articulated Arm Planner. You can adjust angles or movement order anytime and repeat the steps to update the program.
