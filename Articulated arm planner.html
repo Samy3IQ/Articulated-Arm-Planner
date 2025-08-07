@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Articulated arm planner</title>
+  <style>
+    body {
+      font-family: monospace, monospace;
+      margin: 8px 12px;
+      font-size: 13px;
+      background: #fff;
+      color: #000;
+      line-height: 1.3;
+      user-select: none;
+    }
+
+    h2 {
+      font-weight: 700;
+      font-size: 1.6em;
+      margin-bottom: 10px;
+      user-select: text;
+    }
+
+    h3 {
+      font-weight: 700;
+      font-size: 1.1em;
+      margin: 12px 0 6px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 2px;
+      color: #333300;
+      user-select: text;
+    }
+
+    #legendControls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .legend, .controls, .history {
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      flex: 1 1 260px;
+      padding: 8px 10px;
+      box-sizing: border-box;
+      max-width: 300px;
+      user-select: text;
+    }
+
+    .angleInputs label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .angleInputs input[type="number"] {
+      margin-left: 4px;
+      width: 60px;
+      font-family: monospace;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 1px 3px;
+      border: 1px solid #bbb;
+      border-radius: 2px;
+    }
+
+    .presetButtons {
+      display: flex;
+      gap: 8px;
+      margin: 8px 0 10px;
+    }
+
+    .presetButtons button {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid #b38f00;
+      background-color: #fffda0;
+      color: #665500;
+      font-weight: 600;
+      font-family: monospace;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    .presetButtons button.active {
+      background-color: #ffeb3b;
+      border-color: #a68c00;
+      color: #4a4000;
+      font-weight: 700;
+    }
+
+    #controlsExplanation {
+      font-size: 12px;
+      color: #444400;
+      line-height: 1.2;
+      white-space: pre-line;
+      min-height: 72px;
+      overflow-y: auto;
+      user-select: text;
+    }
+
+    #movementHistory {
+      font-size: 14px;
+      min-height: 24px;
+      padding: 5px 6px;
+      border: 1px solid #ccc;
+      background: #fafafa;
+      max-width: 100%;
+      max-height: 180px;
+      overflow-y: auto;
+      word-break: break-word;
+      user-select: text;
+      line-height: 1.2;
+      letter-spacing: 0.02em;
+    }
+
+    #currentSelection {
+      margin: 3px 0 12px;
+      font-size: 14px;
+      padding: 5px 6px;
+      border: 1px solid #d6c94a;
+      background-color: #fffdda;
+      min-height: 24px;
+      font-weight: 600;
+      color: #666600;
+      user-select: text;
+    }
+
+    #angleList, #pinList {
+      background: #f0f0f0;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+      font-size: 13px;
+      font-weight: 600;
+      user-select: text;
+      min-height: 24px;
+      line-height: 1.2;
+      letter-spacing: 0.01em;
+      margin-bottom: 6px;
+    }
+
+    .copyButton {
+      padding: 3px 6px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid #999900;
+      border-radius: 0;
+      background-color: #fffda0;
+      color: #666600;
+      font-family: monospace;
+      user-select: none;
+      margin-left: 6px;
+    }
+
+    .copyButton:hover {
+      background-color: #fff040;
+      border-color: #888800;
+    }
+
+    @media (max-width: 660px) {
+      #legendControls {
+        flex-direction: column;
+      }
+      .legend, .controls, .history {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>Articulated arm planner</h2>
+  <div id="legendControls">
+    <section class="controls">
+      <h3>Key Mapping</h3>
+      <div class="presetButtons" role="radiogroup">
+        <button id="btnQwerty" aria-pressed="false" role="radio" tabindex="0">QWERTY</button>
+        <button id="btnAzerty" class="active" aria-pressed="true" role="radio" tabindex="-1">AZERTY</button>
+      </div>
+      <p id="controlsExplanation" aria-live="polite"></p>
+    </section>
+
+    <section class="legend">
+      <h3>Angles</h3>
+      <div class="angleInputs">
+        <label>Base Right (P0 0°) <input type="number" id="p0right" value="0" min="0" max="180" /></label>
+        <label>Base Left (P0 180°) <input type="number" id="p0left" value="180" min="0" max="180" /></label>
+        <label>Arm Up (P1 35°) <input type="number" id="p1up" value="35" min="0" max="180" /></label>
+        <label>Arm Down (P1 70°) <input type="number" id="p1down" value="70" min="0" max="180" /></label>
+        <label>Hand Closed (P2 0°) <input type="number" id="p2closed" value="0" min="0" max="180" /></label>
+        <label>Hand Open (P2 90°) <input type="number" id="p2open" value="90" min="0" max="180" /></label>
+      </div>
+    </section>
+
+    <section class="history">
+      <h3>Movement History</h3>
+      <div id="movementHistory" aria-live="polite" aria-atomic="true" role="region"></div>
+    </section>
+  </div>
+
+  <div id="currentSelection" aria-live="polite" aria-atomic="true" role="region">None selected</div>
+
+  <h3>ServoAngle</h3>
+  <div>
+    <pre id="angleList">[]</pre>
+    <button class="copyButton" id="copyAngles">Copy</button>
+    <button class="copyButton" id="copyBoth">Copy Both</button>
+  </div>
+
+  <h3>ServoPinNumber</h3>
+  <div>
+    <pre id="pinList">[]</pre>
+    <button class="copyButton" id="copyPins">Copy</button>
+  </div>
+
+  <script>
+    const pinConfig = { P0: { id: 0 }, P1: { id: 1 }, P2: { id: 2 } };
+    const ServoAngle = [], ServoPinNumber = [], MovementHistory = [];
+    let selectedPin = null, currentAngle = null, preview = null, currentPreset = 'azerty';
+
+    const elements = {
+      movementHistory: document.getElementById('movementHistory'),
+      currentSelection: document.getElementById('currentSelection'),
+      angleList: document.getElementById('angleList'),
+      pinList: document.getElementById('pinList'),
+      p0left: document.getElementById('p0left'),
+      p0right: document.getElementById('p0right'),
+      p1up: document.getElementById('p1up'),
+      p1down: document.getElementById('p1down'),
+      p2closed: document.getElementById('p2closed'),
+      p2open: document.getElementById('p2open'),
+      btnQwerty: document.getElementById('btnQwerty'),
+      btnAzerty: document.getElementById('btnAzerty'),
+      controlsExplanation: document.getElementById('controlsExplanation'),
+      copyAngles: document.getElementById('copyAngles'),
+      copyPins: document.getElementById('copyPins'),
+      copyBoth: document.getElementById('copyBoth'),
+    };
+
+    const presets = {
+      qwerty: {
+        left: ['arrowleft', 'a'],
+        right: ['arrowright', 'd'],
+        up: ['arrowup', 'w'],
+        down: ['arrowdown', 's'],
+        open: ['e', 'p'],
+        close: ['q', ';'],
+        explanation: `Use keys to control movements:\nBase (P0): Left / Right arrows or A / D\nArm (P1): Up / Down arrows or W / S\nHand (P2): Open with E, P; Close with Q, ;\nConfirm: Enter | Cancel: Escape | Delete last: Backspace | Reset all: Delete`
+      },
+      azerty: {
+        left: ['arrowleft', 'q'],
+        right: ['arrowright', 'd'],
+        up: ['arrowup', 'z'],
+        down: ['arrowdown', 's'],
+        open: ['e', 'p'],
+        close: ['a', 'm'],
+        explanation: `Use keys to control movements:\nBase (P0): Left / Right arrows or Q / D\nArm (P1): Up / Down arrows or Z / S\nHand (P2): Open with E, P; Close with A, M\nConfirm: Enter | Cancel: Escape | Delete last: Backspace | Reset all: Delete`
+      }
+    };
+
+    function updateDisplay() {
+      elements.movementHistory.innerHTML = '';
+      MovementHistory.forEach((item, i) => {
+        const div = document.createElement('div');
+        div.textContent = item;
+        div.style.borderBottom = i < MovementHistory.length - 1 ? '1px solid #ddd' : 'none';
+        div.style.padding = '2px 0';
+        elements.movementHistory.appendChild(div);
+      });
+
+      if (selectedPin !== null && currentAngle !== null) {
+        elements.currentSelection.textContent = `Selected: ${getLabel(selectedPin, currentAngle)}`;
+      } else if (preview) {
+        elements.currentSelection.textContent = `Preview: ${preview.label}`;
+      } else {
+        elements.currentSelection.textContent = 'None selected';
+      }
+
+      elements.angleList.textContent = JSON.stringify(ServoAngle);
+      elements.pinList.textContent = JSON.stringify(ServoPinNumber);
+    }
+
+    function getLabel(pinNum, angle) {
+      const e = elements;
+      if (pinNum === 0) {
+        if (angle === parseInt(e.p0left.value)) return `base left (P0 ${angle}°)`;
+        if (angle === parseInt(e.p0right.value)) return `base right (P0 ${angle}°)`;
+      } else if (pinNum === 1) {
+        if (angle === parseInt(e.p1up.value)) return `arm up (P1 ${angle}°)`;
+        if (angle === parseInt(e.p1down.value)) return `arm down (P1 ${angle}°)`;
+      } else if (pinNum === 2) {
+        if (angle === parseInt(e.p2closed.value)) return `hand closed (P2 ${angle}°)`;
+        if (angle === parseInt(e.p2open.value)) return `hand open (P2 ${angle}°)`;
+      }
+      return `P${pinNum} ${angle}°`;
+    }
+
+    function setPreview(pin, angle) {
+      preview = { pin, angle, label: getLabel(pinConfig[pin].id, angle) };
+      selectedPin = pinConfig[pin].id;
+      currentAngle = angle;
+      updateDisplay();
+    }
+
+    function confirmPreview() {
+      if (!preview) return;
+      ServoPinNumber.push(selectedPin);
+      ServoAngle.push(currentAngle);
+      MovementHistory.push(preview.label);
+      preview = selectedPin = currentAngle = null;
+      updateDisplay();
+    }
+
+    function deleteLast() {
+      ServoPinNumber.pop();
+      ServoAngle.pop();
+      MovementHistory.pop();
+      preview = selectedPin = currentAngle = null;
+      updateDisplay();
+    }
+
+    function clearAll() {
+      ServoPinNumber.length = ServoAngle.length = MovementHistory.length = 0;
+      preview = selectedPin = currentAngle = null;
+      updateDisplay();
+    }
+
+    elements.btnQwerty.addEventListener('click', () => {
+      currentPreset = 'qwerty';
+      elements.btnQwerty.classList.add('active');
+      elements.btnAzerty.classList.remove('active');
+      elements.btnQwerty.setAttribute('aria-pressed', 'true');
+      elements.btnAzerty.setAttribute('aria-pressed', 'false');
+      elements.controlsExplanation.textContent = presets.qwerty.explanation;
+    });
+
+    elements.btnAzerty.addEventListener('click', () => {
+      currentPreset = 'azerty';
+      elements.btnAzerty.classList.add('active');
+      elements.btnQwerty.classList.remove('active');
+      elements.btnAzerty.setAttribute('aria-pressed', 'true');
+      elements.btnQwerty.setAttribute('aria-pressed', 'false');
+      elements.controlsExplanation.textContent = presets.azerty.explanation;
+    });
+
+    elements.copyAngles.onclick = () => navigator.clipboard.writeText(elements.angleList.textContent);
+    elements.copyPins.onclick = () => navigator.clipboard.writeText(elements.pinList.textContent);
+    elements.copyBoth.onclick = () => navigator.clipboard.writeText(`ServoAngle = ${JSON.stringify(ServoAngle)}\nServoPinNumber = ${JSON.stringify(ServoPinNumber)}`);
+
+    window.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      const p = presets[currentPreset];
+      if (p.left.includes(key)) setPreview('P0', parseInt(elements.p0left.value));
+      else if (p.right.includes(key)) setPreview('P0', parseInt(elements.p0right.value));
+      else if (p.up.includes(key)) setPreview('P1', parseInt(elements.p1up.value));
+      else if (p.down.includes(key)) setPreview('P1', parseInt(elements.p1down.value));
+      else if (p.open.includes(key)) setPreview('P2', parseInt(elements.p2open.value));
+      else if (p.close.includes(key)) setPreview('P2', parseInt(elements.p2closed.value));
+      else if (key === 'enter') confirmPreview();
+      else if (key === 'escape') preview = selectedPin = currentAngle = null, updateDisplay();
+      else if (key === 'backspace') deleteLast();
+      else if (key === 'delete') clearAll();
+    });
+
+    updateDisplay();
+    elements.controlsExplanation.textContent = presets.azerty.explanation;
+  </script>
+</body>
+</html>
