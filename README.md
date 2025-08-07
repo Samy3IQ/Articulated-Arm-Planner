@@ -58,4 +58,4 @@ with the values you copied from the planner.
 
 ## ✅ Done!
 
-Your Micro:bit will now run the servo sequence created in the Articulated Arm Planner. You can adjust angles or movement order anytime and repeat the steps to update the program.
+Your Micro:bit will now run the servo sequence created in the Articulated Arm Planner web app. You can adjust angles or movement order anytime and repeat the steps to update the program.
